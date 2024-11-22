@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from PIL import Image
 from pathlib import Path
+from config import *
 
 def create_simple_dataset(csv_path, image_folder, size=(224, 224)):
 
@@ -28,4 +29,4 @@ def create_simple_dataset(csv_path, image_folder, size=(224, 224)):
     
     return simple_dataset
 
-
+dataset=create_simple_dataset(csv_path, image_folder, size=(224, 224))
