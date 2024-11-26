@@ -66,9 +66,9 @@ def data_loader(train_set, val_set, test_set):
     val_dataset = SimpleDataset(val_set)
     test_dataset = SimpleDataset(test_set)
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=5, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=5, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
 
     return train_loader, val_loader, test_loader
 
@@ -77,9 +77,8 @@ if __name__ == '__main__':
     dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=10)
 
     train_set, val_set, test_set = split_dataset(dataset)
-
     train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set)
-
+    
     train_titles, train_images = next(iter(train_loader))
     print(train_titles)
     print(f"Images batch shape: {train_images.size()}")
