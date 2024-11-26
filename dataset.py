@@ -4,7 +4,7 @@ from PIL import Image
 from pathlib import Path
 from config import *
 
-def create_simple_dataset(csv_path, image_folder, size=(224, 224)):
+def create_simple_dataset(csv_path, image_folder, size=(224, 224), max=None):
 
     data = pd.read_csv(csv_path)
 
@@ -23,10 +23,13 @@ def create_simple_dataset(csv_path, image_folder, size=(224, 224)):
             print(f"Failed to load image: {image_path} | Error: {e}")
             simple_dataset[0].append(row['Title'])
             simple_dataset[1].append(None)
+            
+        if max and len(simple_dataset[0]) >= max: break 
 
-    print(f"Titles: {simple_dataset[0]}")
     print(f"Number of successfully loaded images: {successfully_loaded}")
     
     return simple_dataset
 
-dataset=create_simple_dataset(csv_path, image_folder, size=(224, 224))
+if __name__ == '__main__':
+
+    dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=10)
