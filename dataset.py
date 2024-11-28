@@ -12,25 +12,23 @@ from config import *
 
 class SimpleDataset(Dataset):
     def __init__(self, data):
-        self.titles = [row[0] for row in data]
-        self.images = [row[1] for row in data]
-        self.transform = transforms.Compose([
+        
+        # Resize images to common shape and convert PIL -> Tensor
+        transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((224, 224)),
         ])
-
+        
+        self.titles = [row[0] for row in data]
+        self.images = torch.stack([transform(row[1]) for row in data])
+        
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
         title = self.titles[idx]
         image = self.images[idx]
-
-        if image is not None:
-            image = self.transform(image)
-        else:
-            image = torch.zeros((3, 224, 224))
-
+        
         return title, image
 
 def create_simple_dataset(csv_path, image_folder, size=(224, 224), max=None):
@@ -57,8 +55,10 @@ def create_simple_dataset(csv_path, image_folder, size=(224, 224), max=None):
     return simple_dataset
 
 def split_dataset(simple_dataset, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
-    train_data, temp_data = train_test_split(simple_dataset, train_size=train_ratio, random_state=42)
-    val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+    seed = 42
+    
+    train_data, temp_data = train_test_split(simple_dataset, train_size=train_ratio, random_state=seed)
+    val_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=seed)
     return train_data, val_data, test_data
 
 def data_loader(train_set, val_set, test_set):

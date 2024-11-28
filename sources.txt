@@ -1,1 +1,8 @@
 https://www.kaggle.com/datasets/wilmerarltstrmberg/recipe-dataset-over-2m
+
+
+Use alternative Dataset
+https://huggingface.co/datasets/zmao/chinese_food_caption
+
+Currently, we resize every image to square.
+Currently, we set a fixed random seed
