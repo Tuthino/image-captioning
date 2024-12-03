@@ -14,8 +14,6 @@ model = ResnetGru()
 optimizer = torch.optim.Adam(model.parameters()) # TODO: Fix Resnet Weights
 loss_fn = nn.CrossEntropyLoss()
 
-
-
 epochs = 1000
 
 for e in range(epochs):

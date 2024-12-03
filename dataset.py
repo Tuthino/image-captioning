@@ -48,7 +48,7 @@ def create_simple_dataset(csv_path, image_folder, size=(224, 224), max=None):
                 image = transform(image)
                 assert image is not None
         
-                
+                image = None
                 simple_dataset.append((row['Title'], image))
                 pass
             
