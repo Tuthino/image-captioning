@@ -12,8 +12,9 @@ model = ResnetGru()
 for titles, images in iter(train_loader):
 
     result = model.forward(images)
+
     print(result.shape, result)
     
     for indices, title in zip(result, titles):
         
-        print(title, indices_to_text(indices))
+        print(title, indices2text(indices))

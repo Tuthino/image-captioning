@@ -1,30 +1,11 @@
 from transformers import ResNetModel
 from torch import nn
 import torch
+import numpy as np
+from tokenizer import tokenizer, num_tokens
+from config import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-characters = ['<SOS>', '<EOS>', '<PAD>', ' ', '!', '"', '#', '&', "'", '(', ')', ',', '-', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '=', '?', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-
-num_tokens = len(characters)
-idx2char = {k: v for k, v in enumerate(characters)}
-char2idx = {v: k for k, v in enumerate(characters)}
-
-max_text_length = 200
-
-def indices_to_text(indices):
-    
-    text = ""
-    
-    end_index = char2idx["<EOS>"]
-    
-    for idx in indices:
-        
-        if idx is end_index: break
-        
-        text += idx2char[int(idx)]
-        
-    return text
 
 
 class ResnetGru(nn.Module):
@@ -50,7 +31,7 @@ class ResnetGru(nn.Module):
         
         # Embed Starting Token
         
-        start_token_id = torch.tensor(char2idx['<SOS>']).to(device)
+        start_token_id = torch.tensor(tokenizer.bos_token_id).to(device)
         start_token_embedding = self.embed(start_token_id).repeat(batch_size, 1).to(device)
         
         # Run Gru
@@ -58,7 +39,7 @@ class ResnetGru(nn.Module):
         input = start_token_embedding.unsqueeze(dim=0) # (sequence_length=1, batch_size, 512)
         hidden_state = features.unsqueeze(dim=0) # (1, batch_size, 512)
         
-        for t in range(max_text_length):
+        for t in range(max_tokens - 1):
             output, hidden_state = self.gru(input, hidden_state)
             
             # Use previously generated text as input for future generation
@@ -66,7 +47,6 @@ class ResnetGru(nn.Module):
         
         input = input.permute(1, 0, 2) # batch, seq, 512
         logits = self.proj(input) # batch, seq, token_length
+        logits = nn.functional.softmax(logits, dim=2)
         
-        indices = torch.argmax(logits, dim=2)
-        
-        return indices
+        return logits

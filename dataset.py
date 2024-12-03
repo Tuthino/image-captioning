@@ -12,15 +12,9 @@ from config import *
 
 class SimpleDataset(Dataset):
     def __init__(self, data):
-        
-        # Resize images to common shape and convert PIL -> Tensor
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize((224, 224)),
-        ])
-        
+              
         self.titles = [row[0] for row in data]
-        self.images = torch.stack([transform(row[1]) for row in data])
+        self.images = [row[1] for row in data]
         
     def __len__(self):
         return len(self.images)
@@ -36,21 +30,35 @@ def create_simple_dataset(csv_path, image_folder, size=(224, 224), max=None):
 
     simple_dataset = []
     successfully_loaded = 0
+    
+    transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((224, 224)),
+        ])
 
     for _, row in data.iterrows():
         image_path = Path(image_folder) / f"{row['Image_Name']}.jpg"
         try:
-            image = Image.open(image_path)
-            simple_dataset.append((row['Title'], image))
-            successfully_loaded += 1
+            with Image.open(image_path, "r") as image:
+                
+                # Filter grayscale images
+                assert image.layers == 3
+                
+                # Resize images to common shape and convert PIL -> Tensor
+                image = transform(image)
+                assert image is not None
+        
+                
+                simple_dataset.append((row['Title'], image))
+                pass
+            
         except Exception as e:
             print(f"Failed to load image: {image_path} | Error: {e}")
-            simple_dataset.append((row['Title'], None))
 
         if max and len(simple_dataset) >= max:
             break
 
-    print(f"Number of successfully loaded images: {successfully_loaded}")
+    print(f"Number of successfully loaded images: {len(simple_dataset)}")
 
     return simple_dataset
 
@@ -66,15 +74,15 @@ def data_loader(train_set, val_set, test_set):
     val_dataset = SimpleDataset(val_set)
     test_dataset = SimpleDataset(test_set)
 
-    train_loader = DataLoader(train_dataset, batch_size=5, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=5, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=30, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=30, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=30, shuffle=False)
 
     return train_loader, val_loader, test_loader
 
 if __name__ == '__main__':
 
-    dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=10)
+    dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=100)
 
     train_set, val_set, test_set = split_dataset(dataset)
     train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set)
