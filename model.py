@@ -2,7 +2,7 @@ from transformers import ResNetModel
 from torch import nn
 import torch
 import numpy as np
-from tokenizer import tokenizer, num_tokens
+from tokenizer import *
 from config import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -10,7 +10,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ResnetGru(nn.Module):
     
-    def __init__(self):
+    def __init__(self,num_tokens):
         super().__init__()
         self.resnet = ResNetModel.from_pretrained('microsoft/resnet-18')
         self.gru = nn.GRU(512, 512, num_layers=1)
@@ -19,7 +19,7 @@ class ResnetGru(nn.Module):
         
         self.to(device)
         
-    def forward(self, batch_images):
+    def forward(self, batch_images, tokenizer, max_tokens):
         
         batch_images = batch_images.to(device)
         
