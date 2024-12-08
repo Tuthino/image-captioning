@@ -27,15 +27,15 @@ from dataset import create_simple_dataset, split_dataset, data_loader
 # image_folder = "path/to/your/images"         # Replace with your image folder path
 # max_tokens = 50
 # resnet_model_save_path = "best_model.pth"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # device = "cpu"
 
 ########################################
 # Step 1: Load Your Dataset
 ########################################
-dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=30)
-train_set, val_set, test_set = split_dataset(dataset)
-train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set, batch_size=30)
+# dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=20)
+# train_set, val_set, test_set = split_dataset(dataset)
+# train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set, batch_size=20)
 
 ########################################
 # Step 2: Model and Tokenizer Setup
@@ -125,9 +125,9 @@ def evaluate_bleu(model, val_loader, tokenizer, feature_extractor, device):
 ########################################
 def train_model(train_loader, val_loader, model, optimizer, tokenizer, feature_extractor, device):
     best_val_bleu = -float('inf')
-    patience = 10
+    patience = 50
     patience_counter = 0
-    epochs = 1000
+    epochs = 200
 
     for epoch in range(epochs):
         model.train()
@@ -194,10 +194,12 @@ def train_model(train_loader, val_loader, model, optimizer, tokenizer, feature_e
 # Step 5: Main Execution
 ########################################
 if __name__ == '__main__':
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = "cpu"
     # Load dataset
     dataset = create_simple_dataset(csv_path, image_folder, size=(224, 224), max=10)
     train_set, val_set, test_set = split_dataset(dataset)
-    train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set, batch_size=1)
+    train_loader, val_loader, test_loader = data_loader(train_set, val_set, test_set, batch_size=10)
     
     # Print a sample batch
     train_titles, train_images = next(iter(train_loader))
@@ -218,7 +220,7 @@ if __name__ == '__main__':
     train_model(train_loader, val_loader, model, optimizer, tokenizer, feature_extractor, device)
     
     # Load the best model
-    model.load_state_dict(torch.load(resnet_model_save_path))
+    model.load_state_dict(torch.load(best_model_save_path))
     model.to(device)
     model.eval()
     
@@ -233,6 +235,5 @@ if __name__ == '__main__':
     )
     
     # Test the pipeline with a sample image
-    test_image_path = "path/to/your/test_image.jpg"  # Replace with your test image path
     captions = caption_pipeline(test_image_path)
     print(f"Generated Caption: {captions[0]['generated_text']}")
