@@ -47,6 +47,6 @@ class ResnetGru(nn.Module):
         
         input = input.permute(1, 0, 2) # batch, seq, 512
         logits = self.proj(input) # batch, seq, token_length
-        logits = nn.functional.softmax(logits, dim=2)
+        # logits = nn.functional.softmax(logits, dim=2) CrossEntropyLoss already applies softmax?
         
         return logits

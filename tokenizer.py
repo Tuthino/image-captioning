@@ -19,8 +19,8 @@ def init_tokenizer_set(train_set, tokenizer):
     tokens_train = set({})
     for text, _ in train_set:
         update_set(tokens_train, text, tokenizer)
-    print("tokens train")
-    print(tokens_train)
+    # print("tokens train")
+    # print(tokens_train)
 
     token2idx = {token: idx for idx, token in enumerate(tokens_train)}
     token_tree = {i: {} for i in range(10, -1, -1)}
@@ -35,9 +35,12 @@ def init_tokenizer_set(train_set, tokenizer):
             print(len(token))
 
     num_tokens = len(token2idx)
+
     # idx2token = {k: v for k, v in enumerate(token2idx)}
     idx2token = {idx: token for token, idx in token2idx.items()}
-
+    token2idx['<pad>'] = num_tokens
+    idx2token[num_tokens] = '<pad>'
+    num_tokens += 1
     return token_tree, token2idx, idx2token, num_tokens
 
 
@@ -69,29 +72,6 @@ def indices2text(indices, idx2token):
         text += idx2token[int(idx)]
     return text
 
-
-# def text2indices(text, token_tree):
-#     indices = [token_tree.get(token) for token in text.split()]
-#     num_classes = len(token_tree)
-
-#     valid_indices = []
-
-#     for idx in indices:
-#         if idx is None:
-#             print('warning token not found')
-#         elif idx < num_classes:
-#             valid_indices.append(idx)
-#         else:
-#             print(f"Warning: Index {idx} not found in token_tree")
-
-#     return torch.stack(
-#         [
-#             nn.functional.one_hot(torch.tensor(idx), num_classes=num_classes)
-#             for idx in valid_indices
-#         ]
-#     )
-
-
 def text2indices(text, token_tree, token2idx):
     indices = []
     text = text.replace(" ", "")
@@ -101,7 +81,7 @@ def text2indices(text, token_tree, token2idx):
             sub_part = text[:length]
             if sub_part in token_tree[length]:
                 indices.append(token_tree[length][sub_part])
-                print(length, indices[-1], text, sub_part)
+                # print(length, indices[-1], text, sub_part)
                 text = text[length:]
                 found = True
                 break
